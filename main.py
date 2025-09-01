@@ -35,7 +35,7 @@ def randomstring(n, alpha=True, numeric=True, symbolic=True):
     return ''.join(random.choices(chars, k=n))
 
 
-@app.route("/api/webhook")
+@app.route("/api/webhook", methods=["POST"])
 def webhook():
     data = request.json
     main_form = data["form_response"]
