@@ -3,12 +3,12 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 import json
 
 app = Flask(__name__)
-cert_json = os.environ.get("FIREBASE_CERT_JSON")
+cert_json = os.environ.get("fbcert")
 if not cert_json:
     raise RuntimeError("FIREBASE_CERT_JSON environment variable not set.")
 cert_dict = json.loads(cert_json)
@@ -56,12 +56,15 @@ def webhook():
         }
     print(answers)
     userinfo = {
-        "firstname": "Test Name",
-        "lastname": "Test Name",
-        "signup": datetime.utcnow()
+        "firstname": answers.get("Xminrfo5bSXI", {}).get("value", "N/A"),
+        "lastname": answers.get("95BeNlliNv7I", {}).get("value", "N/A"),
+        "email": answers.get("ElP3gP1ShTJH", {}).get("value", "N/A"),
+        "signup": datetime.now(tz=timezone.utc),
+        "grade": answers.get("sHyteKw084M3", {}).get("value", {}).get("label", "")
     }
-    userid = randomstring(20)
-    db.collection("members").add(userinfo, userid)
+    userid = randomstring(20, symbolic=False)
+    userdoc = db.collection("members").document(userid)
+    userdoc.set(userinfo)
     return {"status": "received"}
 
 

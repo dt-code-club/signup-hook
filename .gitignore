@@ -1,2 +1,3 @@
 .vercel
 servicekey.json
+.env*.local
