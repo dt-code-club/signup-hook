@@ -16,13 +16,15 @@ cred = credentials.Certificate(cert_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+multiseltypes = ["MULTIPLE_CHOICE", "MULTI_SELECT", "DROPDOWN"]
+
 
 @app.route("/")
 def index():
     return "balls"
 
 
-def randomstring(n, alpha=True, numeric=True, symbolic=True):
+def randomstring(n: int, alpha=True, numeric=True, symbolic=True):
     chars = ""
     if alpha:
         chars += string.ascii_letters
@@ -35,32 +37,46 @@ def randomstring(n, alpha=True, numeric=True, symbolic=True):
     return ''.join(random.choices(chars, k=n))
 
 
+def processmulti(choices: list, options: list):
+    answers = []
+    for choice in choices:
+        result = list(filter(lambda x: x["id"] == choice, options))[0]["text"]
+        if (result in ["Yes", "No"]):
+            result = True if result == "Yes" else False
+        answers.append(result)
+    print(answers)
+    if (len(answers) == 1):
+        return answers[0]
+    else:
+        return answers
+
+
 @app.route("/api/webhook", methods=["POST"])
 def webhook():
     data = request.json
-    main_form = data["form_response"]
-    formfields = main_form["definition"]["fields"]
-    fields = {}
+    formfields = data["data"]["fields"]
     answers = {}
     for field in formfields:
-        title = field.get("title")
-        id = field.get("id")
-        fields[id] = title
-    for answer in main_form["answers"]:
-        answerid = answer["field"]["id"]
-        answer = answer[answer["type"]]
-        fieldname = fields[answerid]
-        answers[answerid] = {
-            "name": fieldname,
-            "value": answer
+        key = field["key"].replace("question_", "")
+        question = field["label"]
+        if (field.get("type", "INPUT_TEXT") in multiseltypes):
+            answer = processmulti(field["value"], field["options"])
+        else:
+            answer = field["value"]
+        answers[key] = {
+            "label": question,
+            "answer": answer
         }
-    print(answers)
     userinfo = {
-        "firstname": answers.get("Xminrfo5bSXI", {}).get("value", "N/A"),
-        "lastname": answers.get("95BeNlliNv7I", {}).get("value", "N/A"),
-        "email": answers.get("ElP3gP1ShTJH", {}).get("value", "N/A"),
-        "signup": datetime.now(tz=timezone.utc),
-        "grade": answers.get("sHyteKw084M3", {}).get("value", {}).get("label", "")
+        "firstname": answers.get("jl5Md4", ""),
+        "lastname": answers.get("2K1kq9", ""),
+        "email": answers.get("xJ4Qk5", ""),
+        "signuptime": datetime.now(tz=timezone.utc),
+        "grade": answers.get("Z2vV4B", ""),
+        "previous_experience": answers.get("N7MVKj", ""),
+        "langs": answers.get("qRoBx9", ""),
+        "goals": answers.get("VzvVGM", ""),
+        "questions": answers.get("PzvlpB", "")
     }
     userid = randomstring(20, symbolic=False)
     userdoc = db.collection("members").document(userid)
