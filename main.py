@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 import firebase_admin
 from firebase_admin import credentials, firestore
 import random
@@ -21,7 +21,7 @@ multiseltypes = ["MULTIPLE_CHOICE", "MULTI_SELECT", "DROPDOWN"]
 
 @app.route("/")
 def index():
-    return "balls"
+    return render_template("index.html")
 
 
 def randomstring(n: int, alpha=True, numeric=True, symbolic=True):
@@ -39,12 +39,13 @@ def randomstring(n: int, alpha=True, numeric=True, symbolic=True):
 
 def processmulti(choices: list, options: list):
     answers = []
+    if (choices == None):
+        return []
     for choice in choices:
         result = list(filter(lambda x: x["id"] == choice, options))[0]["text"]
         if (result in ["Yes", "No"]):
             result = True if result == "Yes" else False
         answers.append(result)
-    print(answers)
     if (len(answers) == 1):
         return answers[0]
     else:
