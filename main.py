@@ -95,7 +95,7 @@ def sendwelcome(response: dict):
         src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXNxdDBneDR5em9peWwxb3VucDA2aXk5MjhqcnM0cXZsMDRlYnd3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13HgwGsXF0aiGY/giphy.gif">
     <br><br>
     Aaron Wong<br>
-    DTCC Club President, 2024-2025
+    DTCC Club President, 2025-2026
     '''
     with open("./welcome.html", "r") as file:
         email_body = file.read()
