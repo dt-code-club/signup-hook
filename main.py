@@ -10,8 +10,6 @@ from datetime import datetime, timedelta, timezone
 import os
 import json
 import threading
-import logging
-logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 cert_json = os.environ.get("fbcert")
@@ -65,21 +63,20 @@ def sendwelcome(response: dict):
             continue
         userinfo[item] = response[item]["answer"]
 
-    logging.info(
-        f"Preparing to send welcome email to: {userinfo.get('email')}")
+    print(f"Preparing to send welcome email to: {userinfo.get('email')}")
     username = os.environ.get("app_email")
     password = os.environ.get("app_pw")
-    logging.info(f"Using app_email: {username}")
+    print(f"Using app_email: {username}")
 
     try:
-        logging.info("Connecting to SMTP server...")
+        print("Connecting to SMTP server...")
         server = smtplib.SMTP_SSL('smtp.gmail.com', smtplib.SMTP_SSL_PORT)
         server.set_debuglevel(1)
         server.ehlo()
-        logging.info("Logging in to SMTP server...")
+        print("Logging in to SMTP server...")
         server.login(username, password)
     except Exception as e:
-        logging.error(f"SMTP connection/login failed: {e}")
+        print(f"SMTP connection/login failed: {e}")
         return
 
     msg = EmailMessage()
@@ -113,11 +110,11 @@ def sendwelcome(response: dict):
             email_body = file.read()
         email_body = email_body.replace("[body]", body)
         msg.set_payload(email_body.encode('utf-8'))
-        logging.info("Sending email message...")
+        print("Sending email message...")
         server.send_message(msg)
-        logging.info("Email sent successfully.")
+        print("Email sent successfully.")
     except Exception as e:
-        logging.error(f"Failed to send email: {e}")
+        print(f"Failed to send email: {e}")
 
 
 @app.route("/api/webhook", methods=["POST"])
