@@ -148,7 +148,7 @@ def webhook():
     userid = randomstring(20, symbolic=False)
     userdoc = db.collection("members").document(userid)
     userdoc.set(userinfo)
-    threading.Thread(target=sendwelcome, args=(userinfo,)).start()
+    sendwelcome(userinfo)
     return {"status": "received"}
 
 
