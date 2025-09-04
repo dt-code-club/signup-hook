@@ -9,7 +9,7 @@ import string
 from datetime import datetime, timedelta, timezone
 import os
 import json
-import threading
+from studentsearch import findstudent
 
 app = Flask(__name__)
 cert_json = os.environ.get("fbcert")
@@ -93,11 +93,11 @@ def sendwelcome(response: dict):
     {"Welcome to Code Club, and to your first year of school at David Thompson!" if userinfo["grade"]=="8" else "Welcome to Code Club."} I'm Aaron, the 2025-2026 president of Code Club, and I created this system that allows you to sign up for our club. 
     You've chosen {"to receive our newsletters and other information through email, so you'll receive more email just like this in the future." if userinfo["newsletter"] else "not to receive any email at this address, so you won't receive any more email like this in the future."}
     <br><br>
+    {f"<span style='color:red'> Unfortunately, we couldn't find you in the school database ({userinfo['firstname']} {userinfo['lastname']} - {userinfo['snum']}). If you do indeed attend the school, please send us an email at this address (<a href='mailto:dtcodeclub@gmail.com' style='color:#ff5656 !important;'>dtcodeclub@gmail.com</a>) and we'll try our best to fix this problem.</span><br><br>" if not userinfo["attends"] else ""}
     In the past few years, our recruitment numbers have been down, as well as our meeting attendance. This year,
     the executive team is working to overhaul the club and make your experience the best it can be, and keep it
     that way in the future. We would love to hear what ideas you guys have for this club. We're glad to have you
-    here, and we'd like to chat more. I would like to extend this exclusive invitation to our cozy little
-    Discord server: <a href="https://discord.gg/q6cT42vcTm">discord.gg/q6cT42vcTm</a> <br><br>
+    here, and we'd like to chat more. {"I would like to extend this exclusive invitation to our cozy little Discord server: <a href='https://discord.gg/q6cT42vcTm'>discord.gg/q6cT42vcTm</a>" if userinfo["attends"] else ""}<br><br>
     Thank you for your interest in our club! We hope to see you at the next meeting! :) <br><br>
     <img width="300"
         src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXNxdDBneDR5em9peWwxb3VucDA2aXk5MjhqcnM0cXZsMDRlYnd3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13HgwGsXF0aiGY/giphy.gif">
@@ -133,9 +133,13 @@ def webhook():
             "label": question,
             "answer": answer
         }
+    firstname = answers.get("jl5Md4", "")
+    lastname = answers.get("2K1kq9", "")
+    studentnumber = answers.get("d98jPy", "")
     userinfo = {
-        "firstname": answers.get("jl5Md4", ""),
-        "lastname": answers.get("2K1kq9", ""),
+        "firstname": firstname,
+        "lastname": lastname,
+        "snum": studentnumber,
         "email": answers.get("xJ4Qk5", ""),
         "signuptime": datetime.now(tz=timezone.utc),
         "grade": answers.get("Z2vV4B", ""),
@@ -145,9 +149,19 @@ def webhook():
         "questions": answers.get("PzvlpB", ""),
         "newsletter": answers.get("ExvNXN", "")
     }
+    studentsearch = findstudent(
+        firstname['answer'], lastname['answer'], studentnumber['answer'])
+    foundstudent = False
+    if (len(studentsearch) > 0):
+        print("Student was found in the database.")
+        foundstudent = True
+    userinfo["attends"] = {
+        "answer": foundstudent, "label": "Was student found in school database?"}
+
     userid = randomstring(20, symbolic=False)
     userdoc = db.collection("members").document(userid)
     userdoc.set(userinfo)
+
     sendwelcome(userinfo)
     return {"status": "received"}
 
