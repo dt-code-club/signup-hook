@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 import os
 import json
 from studentsearch import findstudent
+from createinv import generateinvite
 
 app = Flask(__name__)
 cert_json = os.environ.get("fbcert")
@@ -89,6 +90,11 @@ def sendwelcome(response: dict):
     msg['Subject'] = "Welcome to Code Club!"
     msg['From'] = "David Thompson Code Club"
     msg['To'] = f"{userinfo['firstname']} {userinfo['lastname']} <{userinfo['email']}>"
+
+    invitecode = ""
+    if (userinfo["attends"]):
+        invitecode = generateinvite()
+
     body = f'''Hey {userinfo['firstname']},<br>
     {"Welcome to Code Club, and to your first year of school at David Thompson!" if userinfo["grade"]=="8" else "Welcome to Code Club."} I'm Aaron, the 2025-2026 president of Code Club, and I created this system that allows you to sign up for our club. 
     You've chosen {"to receive our newsletters and other information through email, so you'll receive more email just like this in the future." if userinfo["newsletter"] else "not to receive any email at this address, so you won't receive any more email like this in the future."}
@@ -97,7 +103,7 @@ def sendwelcome(response: dict):
     In the past few years, our recruitment numbers have been down, as well as our meeting attendance. This year,
     the executive team is working to overhaul the club and make your experience the best it can be, and keep it
     that way in the future. We would love to hear what ideas you guys have for this club. We're glad to have you
-    here, and we'd like to chat more. {"I would like to extend this exclusive invitation to our cozy little Discord server: <a href='https://discord.gg/q6cT42vcTm'>discord.gg/q6cT42vcTm</a>" if userinfo["attends"] else ""}<br><br>
+    here, and we'd like to chat more. {f"I would like to extend this exclusive invitation to our cozy little Discord server: <a href='https://discord.gg/{invitecode}'>discord.gg/{invitecode}</a> (This invite is exclusive to you and can only be used once, so be careful. It will also expire in <b>1 HOUR</b>.)" if userinfo["attends"] else ""}<br><br>
     Thank you for your interest in our club! We hope to see you at the next meeting! :) <br><br>
     <img width="300"
         src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXNxdDBneDR5em9peWwxb3VucDA2aXk5MjhqcnM0cXZsMDRlYnd3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13HgwGsXF0aiGY/giphy.gif">
