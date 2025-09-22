@@ -1,3 +1,4 @@
 .vercel
 servicekey.json
-.env*.local
+.env.*
+__pycache__
