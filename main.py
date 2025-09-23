@@ -167,7 +167,8 @@ def webhook():
         "langs": answers.get("qRoBx9", ""),
         "goals": answers.get("VzvVGM", ""),
         "questions": answers.get("PzvlpB", ""),
-        "newsletter": answers.get("ExvNXN", "")
+        "newsletter": answers.get("ExvNXN", ""),
+        "discord": answers.get("2K9WlL", "")
     }
     studentsearch = findstudent(studentnumber['answer'])
     foundstudent = False
