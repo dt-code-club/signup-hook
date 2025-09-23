@@ -2,3 +2,5 @@
 servicekey.json
 .env.*
 __pycache__
+.env*.local
+private

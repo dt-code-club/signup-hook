@@ -39,25 +39,6 @@ def findstudentbyrequest(firstname, lastname, snum):
     return searchresults
 
 
-def findstudent(firstname, lastname, snum):
-    students_env = os.environ.get("students")
-    if not students_env:
-        print("No students found in environment variable.")
-        return []
-    # Unescape quotes
-    students_json = students_env.replace('\\"', '"')
-    try:
-        students_obj = json.loads(students_json)
-        students_list = students_obj.get("students", [])
-    except Exception as e:
-        print(f"Error parsing students JSON: {e}")
-        return []
-    searchresults = list(filter(
-        lambda x: x["userPrincipalName"].replace("@learn.vsb.bc.ca", "") == str(snum), students_list))
-    print(searchresults)
-    return searchresults
-
-
 if __name__ == "__main__":
-    findstudent(input("First name: "), input(
+    findstudentbyrequest(input("First name: "), input(
         "Last name: "), input("Student number: "))

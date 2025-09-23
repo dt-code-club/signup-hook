@@ -9,7 +9,6 @@ import string
 from datetime import datetime, timedelta, timezone
 import os
 import json
-from studentsearch import findstudent
 from createinv import generateinvite
 
 app = Flask(__name__)
@@ -55,6 +54,21 @@ def processmulti(choices: list, options: list):
         return answers[0]
     else:
         return answers
+
+
+def findstudent(snum):
+    students_json = db.collection("school").document(
+        "students").get().to_dict()["all"]
+    try:
+        students_obj = json.loads(students_json)
+        students_list = students_obj.get("students", [])
+    except Exception as e:
+        print(f"Error parsing students JSON: {e}")
+        return []
+    searchresults = list(filter(
+        lambda x: x["userPrincipalName"].replace("@learn.vsb.bc.ca", "") == str(snum), students_list))
+    print(searchresults)
+    return searchresults
 
 
 def sendwelcome(response: dict):
@@ -155,8 +169,7 @@ def webhook():
         "questions": answers.get("PzvlpB", ""),
         "newsletter": answers.get("ExvNXN", "")
     }
-    studentsearch = findstudent(
-        firstname['answer'], lastname['answer'], studentnumber['answer'])
+    studentsearch = findstudent(studentnumber['answer'])
     foundstudent = False
     if (len(studentsearch) > 0):
         print("Student was found in the database.")
